@@ -10,11 +10,19 @@ class SpdierOfAmazonSpider(scrapy.Spider):
     start_urls = ["https://www.amazon.com/"]
 
     # create url returner by given param
-    def start_requests(self):
-        """This method contains"""
+    def start_requests(self, search_param: str):
+        """This method parse the given search param and yield it"""
+        # parse the param
+        search_param = search_param.strip().replace(" ", "+")
+
+        # create url
+        url = f"{self.start_urls[0]}/s?k={search_param}"
+
+        # get request
+        yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        pass
+
 
 
 # run the program
