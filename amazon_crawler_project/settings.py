@@ -15,7 +15,10 @@ NEWSPIDER_MODULE = "amazon_crawler_project.spiders"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "amazon_crawler_project (+http://www.yourdomain.com)"
-
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+}
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
