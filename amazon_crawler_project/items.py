@@ -12,4 +12,5 @@ class AmazonCrawlerProjectItem(scrapy.Item):
     name = scrapy.Field()
     detail_url = scrapy.Field()
     image_path = scrapy.Field()
-
+    price = scrapy.Field()
+    reviews = scrapy.Field()

@@ -6,29 +6,40 @@ from amazon.amazon_crawler_project.items import AmazonCrawlerProjectItem
 
 
 class SpdierOfAmazonSpider(scrapy.Spider):
-    def __init__(self, search_param, **kwargs):
-        self.start_urls = [f"https://www.amazon.com/s?k={search_param}"]
-        super().__init__(**kwargs)
 
+    # override
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        with open("filtered_url", "r", encoding="utf-8") as url:
+            self.start_urls = [url.read()]
+
+    # spider setup
     name = "spdier_of_amazon"
     allowed_domains = ["www.amazon.com"]
     start_urls = ["https://www.amazon.com"]
-    """https://www.amazon.com/s?k=lapto12300-20000"""
     # create url returner by given param
 
     def parse(self, response):
+        all_divs = response.css(".puisg-row").extract()
 
-        # create item
-        amazon_items = AmazonCrawlerProjectItem()
+        for div in all_divs:
+            # Convert div string to Selector object
+            div_selector = scrapy.Selector(text=div)
+            # create item
+            amazon_items = AmazonCrawlerProjectItem()
 
-        # fill the fields
-        amazon_items["image_path"] = response.css('.s-image::attr(src)').extract()
+            # querry for name
+            if div_selector.css('.a-size-medium::text').extract():
+                # fill the fields
+                amazon_items["image_path"] = div_selector.css('.s-image::attr(src)').extract()
 
-        amazon_items["name"] = response.css('.a-size-medium::text').extract()
+                amazon_items["name"] = div_selector.css('.a-size-medium::text').extract()
 
-        amazon_items["detail_url"] = response.css('.a-spacing-none.s-line-clamp-2 a::attr(href)').extract()
+                amazon_items["detail_url"] = div_selector.css('.a-spacing-none.s-line-clamp-2 a::attr(href)').extract()
 
-        yield amazon_items
+                amazon_items["price"] = div_selector.css(".a-price-whole::text").extract()
+
+                yield amazon_items
 
         # next page url
         next_page_url = self.start_urls[0]+response.css('.s-pagination-separator::attr(href)').extract_first()
@@ -43,7 +54,7 @@ project_settings = get_project_settings()
 # Specify additional settings for output
 output_settings = {
     'FEED_FORMAT': 'json',  # setting the format to JSON
-    'FEED_URI': 'output.json'  # setting the output file name
+    'FEED_URI': 'details.json'  # setting the output file name
 }
 
 # Merge project settings with output settings
@@ -54,5 +65,5 @@ settings.update(output_settings)
 # run the program
 if __name__ == "__main__":
     process = CrawlerProcess(settings)
-    process.crawl(SpdierOfAmazonSpider, search_param="laptop")
+    process.crawl(SpdierOfAmazonSpider)
     process.start()
